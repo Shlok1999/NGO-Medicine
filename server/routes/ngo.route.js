@@ -24,13 +24,13 @@ router.post('/add-ngo', (req, res) => {
 
     connection.query(`insert into ngo values (?,?,?,?,?);`,
         [id, name, username, password, address], (err, result) => {
-        if (err) {
-            res.send(err);
-        }
-        else {
-            res.send(result);
-        }
-    });
+            if (err) {
+                res.send(err);
+            }
+            else {
+                res.send(result);
+            }
+        });
 });
 
 router.post('/login', (req, res) => {
@@ -45,7 +45,7 @@ router.post('/login', (req, res) => {
                 }
                 if (result) {
                     req.session.loggedin = true;
-                    req.session.id = result[0].id;
+                    // req.session.id = result[0].id;
                     req.session.userData = result[0];
                     res.status(200).send(result)
                 }
@@ -59,23 +59,33 @@ router.post('/login', (req, res) => {
     }
 })
 
-router.post('/request-medicine', (req, res)=>{
+router.post('/request-medicine', (req, res) => {
     const ngoname = req.body.ngoname;
     const medName = req.body.medicineName;
     const medQty = req.body.medicineQty;
 
-    if(req.session){
-        connection.query(`insert into requestedmedicine values((select username from ngo where username =? ),?,?);
-        `, [ngoname,medName, medQty], (err, result)=>{
-            if(err){
+
+    if (req.session) {
+        connection.query(`create table if not exists requestedmedicine(ngoname varchar(255), medicineName varchar(255), medicineQty int);`, (err, result) => {
+            if (err) {
                 res.send(err);
             }
-            else{
-                res.send(result);
+            else {
+                console.log("Table Created");
+                connection.query(`insert into requestedmedicine values((select username from ngo where username =? ),?,?);
+        `, [ngoname, medName, medQty], (err, result) => {
+                    if (err) {
+                        res.send(err);
+                    }
+                    else {
+                        res.send(result);
+                    }
+                })
             }
         })
+
     }
-    else{
+    else {
         res.send("You Logged Out");
     }
 })

@@ -43,7 +43,7 @@ router.post('/login', (req, res)=>{
         }
         if (result) {
             req.session.loggedin=true;
-            req.session.id = result[0].id;
+            // req.session.id = result[0].id;
             req.session.userData = result[0];
             res.status(200).send(result)
 
